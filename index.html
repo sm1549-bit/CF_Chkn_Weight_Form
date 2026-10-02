@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pen Clear Entry</title>
+  <title>CF Chicken Weights Form</title>
   <style>
     :root {
       --bg: #f4f6fb;
@@ -254,20 +254,10 @@
 </head>
 <body>
   <div class="shell">
-    <div class="brand">
-      <div class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
-      </div>
-      <div>
-        <div class="brand-name">Farm Registry</div>
-        <div class="brand-sub">Pen clear records</div>
-      </div>
-    </div>
-
     <main class="card">
       <header class="card-head">
-        <h1>Pen Clear Entry</h1>
-        <p>Record chicken weights and mortality for a pen. Fields marked <span class="req">*</span> are required.</p>
+        <h1>CF Chicken Weights Form</h1>
+        <p>Please weigh your birds and submit this form on the same day you weigh them. <strong style="color: var(--danger)">Please ensure your information (the farmer) below is correct!</strong></p>
       </header>
 
       <div id="banner" class="banner" role="status" aria-live="polite" tabindex="-1"></div>
@@ -278,26 +268,25 @@
           <h2 class="section-title">Farm details</h2>
           <div class="grid">
             <div class="field" data-field="farmer">
-              <label for="farmer">Farmer name<span class="req">*</span></label>
-              <select id="farmer" name="farmer" required></select>
-              <p class="error" id="farmer-error">Select a farmer.</p>
+              <label for="farmer">Farm name<span class="req">*</span></label>
+              <input id="farmer" name="farmer" type="text" autocomplete="off" placeholder="Enter farm name" required />
+              <p class="error" id="farmer-error">Enter the farm name.</p>
             </div>
             <div class="field" data-field="farmId">
               <label for="farmId">Farm ID<span class="req">*</span></label>
-              <select id="farmId" name="farmId" required></select>
-              <p class="error" id="farmId-error">Select a Farm ID.</p>
+              <input id="farmId" name="farmId" type="text" autocomplete="off" placeholder="Enter Farm ID" required />
+              <p class="error" id="farmId-error">Enter the Farm ID.</p>
             </div>
             <div class="field" data-field="pen">
               <label for="pen">Pen #<span class="req">*</span></label>
-              <select id="pen" name="pen" required></select>
-              <p class="error" id="pen-error">Select a pen.</p>
+              <input id="pen" name="pen" type="text" inputmode="numeric" autocomplete="off" placeholder="Enter pen #" required />
+              <p class="error" id="pen-error">Enter a pen number.</p>
             </div>
             <fieldset class="field" data-field="entryDate" aria-describedby="entryDate-error">
               <legend class="label">Date of entry<span class="req">*</span></legend>
-              <div class="date-row" data-date="entry">
+              <div class="date-row" data-date="entry" style="grid-template-columns: 1.5fr 1fr">
                 <select aria-label="Entry month" data-part="m"></select>
                 <select aria-label="Entry day" data-part="d"></select>
-                <select aria-label="Entry year" data-part="y"></select>
               </div>
               <p class="error" id="entryDate-error">Select a complete date.</p>
             </fieldset>
@@ -335,21 +324,22 @@
         <!-- Mortality -->
         <section class="section">
           <h2 class="section-title">Mortality</h2>
-          <div class="grid">
-            <div class="field" data-field="mortality">
-              <label for="mortality">Mortality (birds)<span class="req">*</span></label>
-              <input id="mortality" name="mortality" type="number" min="0" step="1" inputmode="numeric" placeholder="0" />
-              <p class="error" id="mortality-error">Enter a whole number of 0 or more.</p>
-            </div>
+          <div class="grid" style="grid-template-columns: 1fr">
             <fieldset class="field" data-field="mortDate" aria-describedby="mortDate-error">
-              <legend class="label">Mortality date <span class="opt" id="mortDate-opt">(required if mortality &gt; 0)</span></legend>
-              <div class="date-row" data-date="mort">
+              <legend class="label">Mortality up to date <span class="opt" id="mortDate-opt">(required if mortality &gt; 0)</span></legend>
+              <div class="date-row" data-date="mort" style="grid-template-columns: 1.5fr 1fr">
                 <select aria-label="Mortality month" data-part="m"></select>
                 <select aria-label="Mortality day" data-part="d"></select>
-                <select aria-label="Mortality year" data-part="y"></select>
               </div>
+              <p style="margin: 8px 0 0; font-size: 12.5px; font-weight: 700; color: var(--danger)">Last Date of Total Mortality</p>
               <p class="error" id="mortDate-error">Select a complete date.</p>
             </fieldset>
+            <div class="field" data-field="mortality">
+              <label for="mortality">Mortality number to last date<span class="req">*</span></label>
+              <input id="mortality" name="mortality" type="number" min="0" step="1" inputmode="numeric" placeholder="0" />
+              <p style="margin: 8px 0 0; font-size: 12.5px; font-weight: 700; color: var(--danger)">If the mortality count changes, update the mortality date to the day it is being reported.</p>
+              <p class="error" id="mortality-error">Enter a whole number of 0 or more.</p>
+            </div>
           </div>
         </section>
 
@@ -368,15 +358,6 @@
       'use strict';
 
       /* ---------- Sample dropdown data (replace with your own) ---------- */
-      var FARMS = [
-        { name: 'John Anderson',  id: 'FRM-1001' },
-        { name: 'Maria Gonzalez', id: 'FRM-1002' },
-        { name: 'Robert Miller',  id: 'FRM-1003' },
-        { name: 'Sarah Thompson', id: 'FRM-1004' },
-        { name: 'David Carter',   id: 'FRM-1005' },
-        { name: 'Linda Nguyen',   id: 'FRM-1006' }
-      ];
-      var PEN_COUNT = 20;
       var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
                     'August', 'September', 'October', 'November', 'December'];
 
@@ -409,25 +390,10 @@
       /* ---------- Farmer / Farm ID / Pen dropdowns ---------- */
       var farmer = $('#farmer'), farmId = $('#farmId'), pen = $('#pen');
 
-      addOption(farmer, '', 'Select farmer');
-      addOption(farmId, '', 'Select Farm ID');
-      addOption(pen, '', 'Select pen');
-      FARMS.forEach(function (f) {
-        addOption(farmer, f.name, f.name);
-        addOption(farmId, f.id, f.id);
-      });
-      for (var p = 1; p <= PEN_COUNT; p++) addOption(pen, String(p), 'Pen ' + p);
-
-      // Picking a farmer selects their Farm ID, and vice versa.
-      farmer.addEventListener('change', function () {
-        var match = FARMS.filter(function (f) { return f.name === farmer.value; })[0];
-        farmId.value = match ? match.id : '';
-        setPlaceholderStyle(farmId);
-      });
-      farmId.addEventListener('change', function () {
-        var match = FARMS.filter(function (f) { return f.id === farmId.value; })[0];
-        farmer.value = match ? match.name : '';
-        setPlaceholderStyle(farmer);
+      // Pen # accepts digits only.
+      pen.addEventListener('input', function () {
+        var cleaned = pen.value.replace(/[^0-9]/g, '');
+        if (cleaned !== pen.value) pen.value = cleaned;
       });
 
       /* ---------- Month / Day / Year dropdown groups ---------- */
@@ -440,12 +406,16 @@
         var m = $('[data-part="m"]', group), d = $('[data-part="d"]', group), y = $('[data-part="y"]', group);
         addOption(m, '', 'Month');
         MONTHS.forEach(function (name, i) { addOption(m, String(i + 1), name); });
-        addOption(y, '', 'Year');
-        for (var yr = thisYear + 1; yr >= thisYear - 3; yr--) addOption(y, String(yr), String(yr));
+        // A group without a year select (entry and mortality dates) always uses the current year.
+        if (y) {
+          addOption(y, '', 'Year');
+          for (var yr = thisYear + 1; yr >= thisYear - 3; yr--) addOption(y, String(yr), String(yr));
+        }
 
         function rebuildDays() {
           var keep = d.value;
-          var max = m.value ? daysIn(+m.value, y.value ? +y.value : 2024) : 31;
+          var year = y ? (y.value ? +y.value : 2024) : thisYear;
+          var max = m.value ? daysIn(+m.value, year) : 31;
           d.innerHTML = '';
           addOption(d, '', 'Day');
           for (var i = 1; i <= max; i++) addOption(d, String(i), String(i));
@@ -453,13 +423,13 @@
           setPlaceholderStyle(d);
         }
 
-        [m, y].forEach(function (s) { s.addEventListener('change', rebuildDays); });
+        [m, y].forEach(function (s) { if (s) s.addEventListener('change', rebuildDays); });
         $$('select', group).forEach(function (s) { s.addEventListener('change', function () { setPlaceholderStyle(s); }); });
 
         rebuildDays();
         if (defaultToToday) {
           m.value = String(today.getMonth() + 1);
-          y.value = String(thisYear);
+          if (y) y.value = String(thisYear);
           rebuildDays();
           d.value = String(today.getDate());
         }
@@ -468,14 +438,15 @@
 
       // Returns { state: 'empty' | 'partial' | 'ok', date: Date|null }
       function readDate(group) {
-        var m = $('[data-part="m"]', group).value, d = $('[data-part="d"]', group).value, y = $('[data-part="y"]', group).value;
-        if (!m && !d && !y) return { state: 'empty', date: null };
+        var yEl = $('[data-part="y"]', group);
+        var m = $('[data-part="m"]', group).value, d = $('[data-part="d"]', group).value, y = yEl ? yEl.value : String(thisYear);
+        if (!m && !d && (!yEl || !y)) return { state: 'empty', date: null };
         if (!m || !d || !y) return { state: 'partial', date: null };
         return { state: 'ok', date: new Date(+y, +m - 1, +d) };
       }
 
-      function formatDate(date) {
-        return MONTHS[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+      function formatDate(date, withYear) {
+        return MONTHS[date.getMonth()] + ' ' + date.getDate() + (withYear === false ? '' : ', ' + date.getFullYear());
       }
 
       var entryGroup = $('[data-date="entry"]'), mortGroup = $('[data-date="mort"]');
@@ -515,7 +486,7 @@
 
       // Clear a field's error as soon as the user touches it.
       [['farmer', farmer], ['farmId', farmId], ['pen', pen]].forEach(function (pair) {
-        pair[1].addEventListener('change', function () { clearError(pair[0]); });
+        pair[1].addEventListener('input', function () { clearError(pair[0]); });
       });
       $$('select', entryGroup).forEach(function (s) { s.addEventListener('change', function () { clearError('entryDate'); }); });
       $$('select', mortGroup).forEach(function (s) { s.addEventListener('change', function () { clearError('mortDate'); }); });
@@ -526,9 +497,9 @@
         function fail(name, message) { setError(name, message); errors.push(name); }
         $$('.invalid').forEach(function (el) { el.classList.remove('invalid'); });
 
-        if (!farmer.value) fail('farmer');
-        if (!farmId.value) fail('farmId');
-        if (!pen.value) fail('pen');
+        if (!farmer.value.trim()) fail('farmer');
+        if (!farmId.value.trim()) fail('farmId');
+        if (!pen.value.trim()) fail('pen');
 
         var entry = readDate(entryGroup);
         if (entry.state !== 'ok') fail('entryDate', 'Select a complete date of entry.');
@@ -568,23 +539,23 @@
 
         var entry = readDate(entryGroup), md = readDate(mortGroup);
         var record = {
-          farmerName: farmer.value,
-          farmId: farmId.value,
+          farmName: farmer.value.trim(),
+          farmId: farmId.value.trim(),
           pen: Number(pen.value),
-          dateOfEntry: formatDate(entry.date),
+          dateOfEntry: formatDate(entry.date, false),
           weight: {
             grams: parseFloat(wInputs.g.value),
             pounds: parseFloat(wInputs.lb.value),
             ounces: parseFloat(wInputs.oz.value)
           },
           mortality: Number($('#mortality').value),
-          mortalityDate: md.state === 'ok' ? formatDate(md.date) : null
+          mortalityDate: md.state === 'ok' ? formatDate(md.date, false) : null
         };
         console.log('Pen clear entry submitted:', record);
 
         banner.innerHTML =
           '<strong>Entry captured</strong><dl>' +
-          '<dt>Farmer</dt><dd>' + esc(record.farmerName) + ' (' + esc(record.farmId) + ')</dd>' +
+          '<dt>Farm</dt><dd>' + esc(record.farmName) + ' (' + esc(record.farmId) + ')</dd>' +
           '<dt>Pen</dt><dd>' + record.pen + '</dd>' +
           '<dt>Date of entry</dt><dd>' + esc(record.dateOfEntry) + '</dd>' +
           '<dt>Weight</dt><dd>' + fmt(record.weight.grams, 'g') + ' g &middot; ' + fmt(record.weight.pounds, 'lb') + ' lb &middot; ' + fmt(record.weight.ounces, 'oz') + ' oz</dd>' +
@@ -606,9 +577,8 @@
         setTimeout(function () {
           $$('.invalid').forEach(function (el) { el.classList.remove('invalid'); });
           banner.classList.remove('show');
-          var m = $('[data-part="m"]', entryGroup), d = $('[data-part="d"]', entryGroup), y = $('[data-part="y"]', entryGroup);
+          var m = $('[data-part="m"]', entryGroup), d = $('[data-part="d"]', entryGroup);
           m.value = String(today.getMonth() + 1);
-          y.value = String(thisYear);
           m.dispatchEvent(new Event('change'));
           d.value = String(today.getDate());
           $$('select').forEach(setPlaceholderStyle);
