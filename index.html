@@ -15,7 +15,7 @@
       --border-strong: #cbd5e1;
       --text: #0f172a;
       --text-muted: #64748b;
-      --accent: #4f46e5;
+      --accent: #4f46e5; 
       --accent-hover: #4338ca;
       --accent-soft: rgba(79, 70, 229, 0.12);
       --danger: #dc2626;
@@ -524,6 +524,7 @@
       }
 
       /* ---------- Submit / reset ---------- */
+      var FLOW_URL = 'https://default35aae02806ee48aca826e22d9de18b.7c.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/25/workflows/a24eec589cd04724aad3c9bdb9933697/triggers/manual/paths/invoke?api-version=1';
       var form = $('#entry-form'), banner = $('#banner');
 
       form.addEventListener('submit', function (e) {
@@ -551,19 +552,35 @@
           mortality: Number($('#mortality').value),
           mortalityDate: md.state === 'ok' ? formatDate(md.date, false) : null
         };
-        console.log('Pen clear entry submitted:', record);
 
-        banner.innerHTML =
-          '<strong>Entry captured</strong><dl>' +
-          '<dt>Farm</dt><dd>' + esc(record.farmName) + ' (' + esc(record.farmId) + ')</dd>' +
-          '<dt>Pen</dt><dd>' + record.pen + '</dd>' +
-          '<dt>Date of entry</dt><dd>' + esc(record.dateOfEntry) + '</dd>' +
-          '<dt>Weight</dt><dd>' + fmt(record.weight.grams, 'g') + ' g &middot; ' + fmt(record.weight.pounds, 'lb') + ' lb &middot; ' + fmt(record.weight.ounces, 'oz') + ' oz</dd>' +
-          '<dt>Mortality</dt><dd>' + record.mortality + (record.mortalityDate ? ' on ' + esc(record.mortalityDate) : '') + '</dd>' +
-          '</dl>';
-        banner.classList.add('show');
-        banner.focus();
-        banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var submitBtn = $('button[type="submit"]', form);
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        fetch(FLOW_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(record)
+        }).then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          banner.innerHTML =
+            '<strong>Entry captured</strong><dl>' +
+            '<dt>Farm</dt><dd>' + esc(record.farmName) + ' (' + esc(record.farmId) + ')</dd>' +
+            '<dt>Pen</dt><dd>' + record.pen + '</dd>' +
+            '<dt>Date of entry</dt><dd>' + esc(record.dateOfEntry) + '</dd>' +
+            '<dt>Weight</dt><dd>' + fmt(record.weight.grams, 'g') + ' g &middot; ' + fmt(record.weight.pounds, 'lb') + ' lb &middot; ' + fmt(record.weight.ounces, 'oz') + ' oz</dd>' +
+            '<dt>Mortality</dt><dd>' + record.mortality + (record.mortalityDate ? ' on ' + esc(record.mortalityDate) : '') + '</dd>' +
+            '</dl>';
+        }).catch(function (err) {
+          console.error('Submit failed:', err);
+          banner.innerHTML = '<strong>Submission failed</strong><p>Your entry was not sent. Please check your connection and try again.</p>';
+        }).then(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit entry';
+          banner.classList.add('show');
+          banner.focus();
+          banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
       });
 
       function esc(s) {
