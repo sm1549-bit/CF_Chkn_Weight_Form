@@ -182,6 +182,8 @@
     }
     .weight-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
     .unit-input { position: relative; }
+    .lboz-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .lboz-row .unit-input input { padding-right: 34px; }
     .unit-input input { padding-right: 52px; font-variant-numeric: tabular-nums; }
     .unit-tag {
       position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
@@ -309,8 +311,11 @@
                   <div class="unit-input"><input id="w-lb" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-unit="lb" /><span class="unit-tag">lb</span></div>
                 </div>
                 <div>
-                  <label for="w-oz">Ounces</label>
-                  <div class="unit-input"><input id="w-oz" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-unit="oz" /><span class="unit-tag">oz</span></div>
+                  <label for="w-plb">Pounds &amp; Ounces</label>
+                  <div class="lboz-row">
+                    <div class="unit-input"><input id="w-plb" type="text" inputmode="numeric" autocomplete="off" placeholder="0" data-unit="plb" /><span class="unit-tag">lb</span></div>
+                    <div class="unit-input"><input id="w-poz" type="text" inputmode="decimal" autocomplete="off" placeholder="0" data-unit="poz" /><span class="unit-tag">oz</span></div>
+                  </div>
                 </div>
               </div>
               <p class="hint">
@@ -368,6 +373,20 @@
       var TO_GRAMS   = { g: function (v) { return v; }, lb: function (v) { return v * G_PER_LB; }, oz: function (v) { return v * G_PER_OZ; } };
       var FROM_GRAMS = { g: function (v) { return v; }, lb: function (v) { return v / G_PER_LB; }, oz: function (v) { return v / G_PER_OZ; } };
       var DECIMALS   = { g: 1, lb: 3, oz: 2 };
+
+      // Split grams into whole pounds and ounces (one decimal), e.g. 2500 g -> { lb: 5, oz: 8.2 }.
+      function splitLbOz(grams) {
+        var totalOz = grams / G_PER_OZ;
+        var lb = Math.floor(totalOz / 16);
+        var oz = parseFloat((totalOz - lb * 16).toFixed(1));
+        if (oz >= 16) { lb += 1; oz = 0; }
+        return { lb: lb, oz: oz };
+      }
+      function formatLbOz(grams) {
+        var p = splitLbOz(grams);
+        return p.lb + ' lb ' + p.oz + ' oz';
+      }
+
 
       function $(sel, root) { return (root || document).querySelector(sel); }
       function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
@@ -455,23 +474,34 @@
       buildDateGroup(mortGroup, false);
 
       /* ---------- Weight inputs ---------- */
-      var wInputs = { g: $('#w-g'), lb: $('#w-lb'), oz: $('#w-oz') };
+      var wInputs = { g: $('#w-g'), lb: $('#w-lb'), plb: $('#w-plb'), poz: $('#w-poz') };
 
       Object.keys(wInputs).forEach(function (unit) {
         var input = wInputs[unit];
         input.addEventListener('input', function () {
-          // Keep digits and a single decimal point only.
-          var cleaned = input.value.replace(/[^0-9.]/g, '');
+          // Keep digits and a single decimal point only (whole pounds in the lb & oz box).
+          var cleaned = input.value.replace(unit === 'plb' ? /[^0-9]/g : /[^0-9.]/g, '');
           var firstDot = cleaned.indexOf('.');
           if (firstDot !== -1) cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
           if (cleaned !== input.value) input.value = cleaned;
 
-          var n = parseFloat(cleaned);
-          var grams = isNaN(n) ? null : TO_GRAMS[unit](n);
-          Object.keys(wInputs).forEach(function (other) {
+          var grams, fromParts = unit === 'plb' || unit === 'poz';
+          if (fromParts) {
+            var lbPart = parseFloat(wInputs.plb.value), ozPart = parseFloat(wInputs.poz.value);
+            grams = isNaN(lbPart) && isNaN(ozPart) ? null : ((lbPart || 0) * 16 + (ozPart || 0)) * G_PER_OZ;
+          } else {
+            var n = parseFloat(cleaned);
+            grams = isNaN(n) ? null : TO_GRAMS[unit](n);
+          }
+          ['g', 'lb'].forEach(function (other) {
             if (other === unit) return;
             wInputs[other].value = grams === null ? '' : fmt(FROM_GRAMS[other](grams), other);
           });
+          if (!fromParts) {
+            var parts = grams === null ? null : splitLbOz(grams);
+            wInputs.plb.value = parts ? String(parts.lb) : '';
+            wInputs.poz.value = parts ? String(parts.oz) : '';
+          }
           clearError('weight');
         });
       });
@@ -548,7 +578,8 @@
           weight: {
             grams: parseFloat(wInputs.g.value),
             pounds: parseFloat(wInputs.lb.value),
-            ounces: parseFloat(wInputs.oz.value)
+            ounces: parseFloat((parseFloat(wInputs.g.value) / G_PER_OZ).toFixed(2)),
+            poundsAndOunces: formatLbOz(parseFloat(wInputs.g.value))
           },
           mortality: Number($('#mortality').value),
           mortalityDate: md.state === 'ok' ? formatDate(md.date) : null
@@ -569,7 +600,7 @@
             '<dt>Farm</dt><dd>' + esc(record.farmName) + ' (' + esc(record.farmId) + ')</dd>' +
             '<dt>Pen</dt><dd>' + record.pen + '</dd>' +
             '<dt>Date of entry</dt><dd>' + esc(record.dateOfEntry) + '</dd>' +
-            '<dt>Weight</dt><dd>' + fmt(record.weight.grams, 'g') + ' g &middot; ' + fmt(record.weight.pounds, 'lb') + ' lb &middot; ' + fmt(record.weight.ounces, 'oz') + ' oz</dd>' +
+            '<dt>Weight</dt><dd>' + fmt(record.weight.grams, 'g') + ' g &middot; ' + fmt(record.weight.pounds, 'lb') + ' lb &middot; ' + esc(record.weight.poundsAndOunces) + '</dd>' +
             '<dt>Mortality</dt><dd>' + record.mortality + (record.mortalityDate ? ' on ' + esc(record.mortalityDate) : '') + '</dd>' +
             '</dl>';
         }).catch(function (err) {
