@@ -284,9 +284,10 @@
             </div>
             <fieldset class="field" data-field="entryDate" aria-describedby="entryDate-error">
               <legend class="label">Date of entry<span class="req">*</span></legend>
-              <div class="date-row" data-date="entry" style="grid-template-columns: 1.5fr 1fr">
+              <div class="date-row" data-date="entry" style="grid-template-columns: 1.5fr 1fr 1fr">
                 <select aria-label="Entry month" data-part="m"></select>
                 <select aria-label="Entry day" data-part="d"></select>
+                <select aria-label="Entry year" data-part="y"></select>
               </div>
               <p class="error" id="entryDate-error">Select a complete date.</p>
             </fieldset>
@@ -524,7 +525,7 @@
       }
 
       /* ---------- Submit / reset ---------- */
-      var FLOW_URL = 'https://default35aae02806ee48aca826e22d9de18b.7c.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/25/workflows/a24eec589cd04724aad3c9bdb9933697/triggers/manual/paths/invoke?api-version=1';
+      var FLOW_URL = 'https://default35aae02806ee48aca826e22d9de18b.7c.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/25/workflows/a24eec589cd04724aad3c9bdb9933697/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=K58PqJrALsKbCfPhw5wF9Y3NN2ElVgM-iIHKlbI4MZo';
       var form = $('#entry-form'), banner = $('#banner');
 
       form.addEventListener('submit', function (e) {
@@ -543,14 +544,14 @@
           farmName: farmer.value.trim(),
           farmId: farmId.value.trim(),
           pen: Number(pen.value),
-          dateOfEntry: formatDate(entry.date, false),
+          dateOfEntry: formatDate(entry.date),
           weight: {
             grams: parseFloat(wInputs.g.value),
             pounds: parseFloat(wInputs.lb.value),
             ounces: parseFloat(wInputs.oz.value)
           },
           mortality: Number($('#mortality').value),
-          mortalityDate: md.state === 'ok' ? formatDate(md.date, false) : null
+          mortalityDate: md.state === 'ok' ? formatDate(md.date) : null
         };
 
         var submitBtn = $('button[type="submit"]', form);
@@ -595,6 +596,7 @@
           $$('.invalid').forEach(function (el) { el.classList.remove('invalid'); });
           banner.classList.remove('show');
           var m = $('[data-part="m"]', entryGroup), d = $('[data-part="d"]', entryGroup);
+          $('[data-part="y"]', entryGroup).value = String(thisYear);
           m.value = String(today.getMonth() + 1);
           m.dispatchEvent(new Event('change'));
           d.value = String(today.getDate());
